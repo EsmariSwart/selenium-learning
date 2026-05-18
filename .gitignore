@@ -1,5 +1,21 @@
-# Maven build output
+# Maven
 target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Allure: CLI cache, generated reports, and raw results (target/ covers most of this)
+.allure/
+allure-results/
+allure-report/
+
+# Compiled Java
+*.class
 
 # IDE
 .idea/
@@ -7,13 +23,26 @@ target/
 .classpath
 .project
 .settings/
-.vscode/
+.vscode/launch.json
+.vscode/*.code-workspace
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Logs and local test artifacts
+# Logs and local artifacts
 *.log
+logs/
+screenshots/
 
-# Screenshots are written under target/screenshots/ (covered by target/)
+# Secrets and local overrides (never commit real credentials)
+.env
+.env.*
+!.env.example
+*.pem
+credentials.json
+secrets/
+
+# Test output outside target (if copied manually)
+surefire-reports/

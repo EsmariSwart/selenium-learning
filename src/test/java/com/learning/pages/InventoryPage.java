@@ -9,6 +9,7 @@ public class InventoryPage extends BasePage {
     private final By cartBadge = By.className("shopping_cart_badge");
     private final By cartLink = By.className("shopping_cart_link");
     private final By backpackAddToCartButton = By.id("add-to-cart-sauce-labs-backpack");
+    private final By bikeLightAddToCartButton = By.id("add-to-cart-sauce-labs-bike-light");
 
     public InventoryPage(WebDriver driver) {
         super(driver);
@@ -31,6 +32,11 @@ public class InventoryPage extends BasePage {
 
     public void addBackpackToCart() {
         click(backpackAddToCartButton);
+        wait.waitForVisibility(cartBadge);
+    }
+
+    public void addBikeLightToCart() {
+        click(bikeLightAddToCartButton);
         wait.waitForVisibility(cartBadge);
     }
 

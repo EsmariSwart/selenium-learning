@@ -13,6 +13,7 @@ public class CheckoutPage extends BasePage {
     private final By finishButton = By.id("finish");
     private final By confirmationHeader = By.className("complete-header");
     private final By checkoutInfoTitle = By.cssSelector("[data-test='title']");
+    private final By errorMessage = By.cssSelector("h3[data-test='error']");
 
     public CheckoutPage(WebDriver driver) {
         super(driver);
@@ -38,6 +39,19 @@ public class CheckoutPage extends BasePage {
         click(continueButton);
         wait.waitForUrlContains("checkout-step-two");
         wait.waitForClickability(finishButton);
+    }
+
+    public void clickContinueWithoutRequiredFields() {
+        click(continueButton);
+        wait.waitForVisibility(errorMessage);
+    }
+
+    public boolean isErrorMessageDisplayed() {
+        return wait.waitForVisibility(errorMessage).isDisplayed();
+    }
+
+    public String getErrorMessageText() {
+        return getText(errorMessage);
     }
 
     public void clickFinish() {

@@ -15,8 +15,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <selenium.version>4.21.0</selenium.version>
         <junit.version>5.10.2</junit.version>
+        <assertj.version>3.25.3</assertj.version>
+        <testng.version>7.9.0</testng.version>
+        <gson.version>2.11.0</gson.version>
+        <allure.version>2.27.0</allure.version>
         <env>dev</env>
         <groups></groups>
+        <excludedGroups>diagnostic</excludedGroups>
         <headless></headless>
     </properties>
 
@@ -33,6 +38,48 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -43,10 +90,30 @@
                 <version>3.2.5</version>
                 <configuration>
                     <groups>${groups}</groups>
+                    <excludedGroups>${excludedGroups}</excludedGroups>
+                    <parallel>methods</parallel>
+                    <threadCount>3</threadCount>
                     <systemPropertyVariables>
                         <env>${env}</env>
                         <headless>${headless}</headless>
+                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
+                    <properties>
+                        <configurationParameters>
+                            junit.jupiter.execution.parallel.enabled=true,
+                            junit.jupiter.execution.parallel.mode.default=concurrent,
+                            junit.jupiter.execution.parallel.config.strategy=fixed,
+                            junit.jupiter.execution.parallel.config.fixed.parallelism=3
+                        </configurationParameters>
+                    </properties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.15.2</version>
+                <configuration>
+                    <reportVersion>${allure.version}</reportVersion>
                 </configuration>
             </plugin>
         </plugins>
@@ -86,6 +153,47 @@
             <properties>
                 <headless>true</headless>
             </properties>
+        </profile>
+
+        <profile>
+            <id>diagnostic</id>
+            <properties>
+                <groups>diagnostic</groups>
+                <excludedGroups>none</excludedGroups>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>testng-suite</id>
+            <activation>
+                <property>
+                    <name>suiteXmlFile</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration combine.self="override">
+                            <suiteXmlFiles>
+                                <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                            </suiteXmlFiles>
+                            <systemPropertyVariables>
+                                <env>${env}</env>
+                                <headless>${headless}</headless>
+                            </systemPropertyVariables>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.surefire</groupId>
+                                <artifactId>surefire-testng</artifactId>
+                                <version>3.2.5</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 

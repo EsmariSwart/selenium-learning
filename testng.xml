@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Smoke">
+    <listeners>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+    <test name="Login">
+        <classes>
+            <class name="com.learning.tests.LoginTestNG"/>
+        </classes>
+    </test>
+</suite>

@@ -40,4 +40,8 @@ public class LoginPage extends BasePage {
     public boolean isErrorMessageDisplayed() {
         return wait.waitForVisibility(errorMessage).isDisplayed();
     }
+
+    public String getErrorMessageText() {
+        return getText(errorMessage);
+    }
 }
