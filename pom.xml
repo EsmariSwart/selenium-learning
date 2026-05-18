@@ -13,19 +13,24 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <selenium.version>4.21.0</selenium.version>
+        <junit.version>5.10.2</junit.version>
+        <env>dev</env>
+        <groups></groups>
+        <headless></headless>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.21.0</version>
+            <version>${selenium.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.10.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -36,8 +41,52 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
+                <configuration>
+                    <groups>${groups}</groups>
+                    <systemPropertyVariables>
+                        <env>${env}</env>
+                        <headless>${headless}</headless>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <env>dev</env>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>qa</id>
+            <properties>
+                <env>qa</env>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>smoke</id>
+            <properties>
+                <groups>smoke</groups>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>regression</id>
+            <properties>
+                <groups>regression</groups>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>headless</id>
+            <properties>
+                <headless>true</headless>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

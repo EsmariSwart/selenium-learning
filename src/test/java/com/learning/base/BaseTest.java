@@ -1,27 +1,22 @@
 package com.learning.base;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 
+import com.learning.extensions.TestResultExtension;
 import com.learning.utils.ConfigReader;
+import com.learning.utils.DriverFactory;
 
+@ExtendWith(TestResultExtension.class)
 public class BaseTest {
 
-    protected WebDriver driver;
+    public WebDriver driver;
 
     @BeforeEach
     public void setUp() {
-        driver = new ChromeDriver();
+        driver = DriverFactory.createDriver();
         driver.manage().window().maximize();
         driver.get(ConfigReader.getProperty("base.url"));
-    }
-
-    @AfterEach
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
     }
 }

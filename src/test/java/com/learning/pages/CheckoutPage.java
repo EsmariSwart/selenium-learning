@@ -20,6 +20,11 @@ public class CheckoutPage extends BasePage {
 
     public void clickCheckout() {
         click(checkoutButton);
+        waitForCheckoutStepOne();
+    }
+
+    public void waitForCheckoutStepOne() {
+        wait.waitForUrlContains("checkout-step-one");
         wait.waitForVisibility(checkoutInfoTitle);
     }
 
@@ -31,10 +36,13 @@ public class CheckoutPage extends BasePage {
 
     public void clickContinue() {
         click(continueButton);
+        wait.waitForUrlContains("checkout-step-two");
+        wait.waitForClickability(finishButton);
     }
 
     public void clickFinish() {
         click(finishButton);
+        wait.waitForUrlContains("checkout-complete");
         wait.waitForVisibility(confirmationHeader);
     }
 

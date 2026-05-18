@@ -1,7 +1,19 @@
-target/*
+# Maven build output
+target/
+
+# IDE
 .idea/
 *.iml
 .classpath
 .project
 .settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and local test artifacts
 *.log
+
+# Screenshots are written under target/screenshots/ (covered by target/)

@@ -25,4 +25,8 @@ public class WaitUtils {
     public WebElement waitForClickability(By locator) {
         return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
+
+    public void waitForUrlContains(String partialUrl) {
+        wait.until(ExpectedConditions.urlContains(partialUrl));
+    }
 }

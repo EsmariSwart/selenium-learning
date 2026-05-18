@@ -1,6 +1,8 @@
 package com.learning.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -17,7 +19,12 @@ public abstract class BasePage {
     }
 
     protected void click(By locator) {
-        wait.waitForClickability(locator).click();
+        WebElement element = wait.waitForClickability(locator);
+        try {
+            element.click();
+        } catch (ElementClickInterceptedException e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+        }
     }
 
     protected void type(By locator, String text) {

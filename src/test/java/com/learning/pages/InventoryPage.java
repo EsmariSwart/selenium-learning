@@ -15,6 +15,7 @@ public class InventoryPage extends BasePage {
     }
 
     public InventoryPage waitUntilLoaded() {
+        wait.waitForUrlContains("inventory");
         wait.waitForVisibility(pageTitle);
         return this;
     }
@@ -30,6 +31,7 @@ public class InventoryPage extends BasePage {
 
     public void addBackpackToCart() {
         click(backpackAddToCartButton);
+        wait.waitForVisibility(cartBadge);
     }
 
     public String getCartBadgeCount() {
