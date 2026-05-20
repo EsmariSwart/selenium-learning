@@ -185,20 +185,6 @@ Open `target/site/surefire-report.html`. JUnit XML is under `target/surefire-rep
 - Allure HTML reporting
 - Environment profiles (`dev` / `qa`) and headless mode
 
-## Git and ignored files
-
-Commit source, `pom.xml`, config, and test data only. Do **not** commit:
-
-| Ignored | Reason |
-|---------|--------|
-| `target/` | Build output, Surefire reports, Allure results, screenshots |
-| `.allure/` | Downloaded Allure CLI (created by `mvn allure:serve`) |
-| `allure-results/`, `allure-report/` | Generated report artifacts if outside `target/` |
-| `.env`, `credentials.json` | Secrets |
-| IDE/OS files | `.idea/`, `*.iml`, `.vscode/launch.json`, etc. |
-
-`.gitignore` is in the repo root; keep it committed so GitHub stays clean.
-
 ## License
 
 Learning project -- use and modify freely.
