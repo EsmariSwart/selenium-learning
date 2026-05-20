@@ -1,6 +1,5 @@
 package com.learning.utils;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,8 +9,6 @@ import java.time.format.DateTimeFormatter;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-
-import io.qameta.allure.Allure;
 
 public final class ScreenshotUtils {
 
@@ -29,18 +26,6 @@ public final class ScreenshotUtils {
         return takesScreenshot.getScreenshotAs(OutputType.BYTES);
     }
 
-    public static void attachToAllure(WebDriver driver, String attachmentName) {
-        byte[] screenshot = captureBytes(driver);
-        if (screenshot == null) {
-            return;
-        }
-        Allure.addAttachment(
-                attachmentName,
-                "image/png",
-                new ByteArrayInputStream(screenshot),
-                "png");
-    }
-
     public static Path capture(WebDriver driver, String testName) {
         byte[] screenshot = captureBytes(driver);
         if (screenshot == null) {
@@ -54,7 +39,6 @@ public final class ScreenshotUtils {
             Path destination = SCREENSHOT_DIR.resolve(safeName + "_" + timestamp + ".png");
 
             Files.write(destination, screenshot);
-            attachToAllure(driver, "Failure screenshot");
             return destination;
         } catch (IOException e) {
             throw new RuntimeException("Failed to save screenshot for test: " + testName, e);

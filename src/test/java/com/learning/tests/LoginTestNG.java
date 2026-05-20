@@ -8,12 +8,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.learning.utils.ScreenshotUtils;
-
 import com.learning.pages.InventoryPage;
 import com.learning.pages.LoginPage;
+import com.learning.reporting.AllureReporter;
 import com.learning.utils.ConfigReader;
 import com.learning.utils.DriverFactory;
+import com.learning.utils.ScreenshotUtils;
 
 public class LoginTestNG {
 
@@ -43,6 +43,7 @@ public class LoginTestNG {
         try {
             if (result.getStatus() == ITestResult.FAILURE && driver != null) {
                 ScreenshotUtils.capture(driver, result.getName());
+                AllureReporter.attachScreenshot(driver, "Failure screenshot");
             }
         } finally {
             if (driver != null) {

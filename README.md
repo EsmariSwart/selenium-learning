@@ -2,7 +2,7 @@
 
 A hands-on practice project for learning browser automation with **Selenium 4**, **Java**, **JUnit 5**, **TestNG**, and **Maven**. Tests run against the public [Sauce Demo](https://www.saucedemo.com/) site (Swag Labs).
 
-The layout follows common enterprise patterns: page objects, feature-based tests, external config and test data, parallel execution, tags for suites, and Allure reporting.
+The layout follows common enterprise patterns: reusable framework code in `src/main`, tests in `src/test`, page objects, feature-based tests, external config and test data, parallel execution, tags for suites, and Allure reporting.
 
 ## Tech stack
 
@@ -19,20 +19,27 @@ The layout follows common enterprise patterns: page objects, feature-based tests
 
 ## Project structure
 
-```
-src/test/java/com/learning/
-  base/              BaseTest - per-test driver setup (@BeforeEach)
-  extensions/        JUnit extensions (screenshot + driver quit on failure)
-  pages/             Page Object Model (Login, Inventory, Cart, Checkout)
-  tests/             Feature-based JUnit test classes
-  tests/support/     Shared flows (TestFlows.loginAsStandardUser)
-  utils/             ConfigReader, DriverFactory, WaitUtils, ScreenshotUtils,
-                     TestDataReader, CheckoutData
+Framework code (reusable, could be packaged as a JAR) lives in `src/main`. Test code and test-only dependencies live in `src/test`.
 
-src/test/resources/
+```
+src/main/java/com/learning/
+  pages/             Page Object Model (Login, Inventory, Cart, Checkout, BasePage)
+  utils/             ConfigReader, DriverFactory, WaitUtils, ScreenshotUtils
+
+src/main/resources/
   config.properties         browser, headless
   config-dev.properties     dev base.url, username, password
   config-qa.properties      qa environment
+
+src/test/java/com/learning/
+  base/              BaseTest - per-test driver setup (@BeforeEach)
+  extensions/        JUnit extensions (screenshot + driver quit on failure)
+  reporting/         AllureReporter (bridges framework screenshots to Allure)
+  tests/             Feature-based JUnit test classes
+  tests/support/     Shared flows (TestFlows.loginAsStandardUser)
+  utils/             TestDataReader, CheckoutData (test data only)
+
+src/test/resources/
   testdata/checkout.json    checkout form data (externalized)
   allure.properties         Allure results directory
 
@@ -59,39 +66,56 @@ Tests live in one class per product area. Use `@Tag("smoke")` or `@Tag("regressi
 - Maven 3.8+
 - Chrome (default), or Firefox / Edge via `config.properties`
 
-Selenium 4 downloads matching drivers automatically (Selenium Manager).
+Selenium 4 downloads matching drivers automatically (Selenium Manager) into your user cache (for example `%USERPROFILE%\.cache\selenium\` on Windows).
 
 ## Configuration
 
 | File | Purpose |
 |------|---------|
-| `config.properties` | `browser`, `headless` |
-| `config-dev.properties` | Dev `base.url`, username, password |
-| `config-qa.properties` | QA settings |
-| `testdata/checkout.json` | Checkout first name, last name, postal code |
+| `src/main/resources/config.properties` | `browser`, `headless` |
+| `src/main/resources/config-dev.properties` | Dev `base.url`, username, password |
+| `src/main/resources/config-qa.properties` | QA settings |
+| `src/test/resources/testdata/checkout.json` | Checkout first name, last name, postal code |
 
 Credentials are the public Sauce Demo users only.
 
 Runtime overrides:
 
 ```bash
-mvn test -Denv=qa
-mvn test -Dheadless=true
-mvn test -Dbrowser=firefox
+mvn test "-Denv=qa"
+mvn test "-Dheadless=true"
+mvn test "-Dbrowser=firefox"
 ```
 
 ## Running tests
 
-All feature tests (diagnostic excluded):
+### PowerShell (Windows)
+
+Quote `-D` and `-P` arguments so PowerShell does not mis-parse them:
+
+```powershell
+mvn clean test "-Pheadless"
+mvn test "-Dtest=LoginTest"
+mvn test "-Dtest=LoginTest#successfulLogin"
+```
+
+### All feature tests (diagnostic excluded)
 
 ```bash
 mvn clean test
 ```
 
-Single class:
+Headless:
 
 ```bash
-mvn test -Dtest=LoginTest
+mvn clean test "-Pheadless"
+```
+
+Single class or method:
+
+```bash
+mvn test "-Dtest=LoginTest"
+mvn test "-Dtest=LoginTest#successfulLogin"
 ```
 
 ### Maven profiles
@@ -108,20 +132,39 @@ mvn test -Dtest=LoginTest
 Examples:
 
 ```bash
-mvn test -Psmoke -Pheadless
-mvn test -Pregression -Pheadless
-mvn test -Pqa -Pheadless
-
-# Intentional failures -- expect BUILD FAILURE; check target/screenshots/
-mvn test -Pdiagnostic -Pheadless
+mvn test "-Psmoke" "-Pheadless"
+mvn test "-Pregression" "-Pheadless"
+mvn test "-Pqa" "-Pheadless"
+mvn test "-Dbrowser=firefox"
 ```
+
+### Verify screenshots and Allure attachments (intentional failures)
+
+Runs only `FailureDemoTest` (three tests that fail on purpose). **Expect BUILD FAILURE** -- that is correct.
+
+```powershell
+mvn clean test "-Pdiagnostic" "-Pheadless"
+```
+
+What should happen on each failure:
+
+1. `ScreenshotUtils.capture(...)` writes a PNG under `target/screenshots/`
+2. `AllureReporter.attachScreenshot(...)` adds **Failure screenshot** to Allure results
+
+Then open the report:
+
+```powershell
+mvn allure:serve
+```
+
+In Allure: open a failed test and look for the **Failure screenshot** attachment.
 
 ### TestNG suite (optional)
 
 Runs `LoginTestNG` via `testng.xml` only (JUnit tests are not run in this mode):
 
 ```bash
-mvn test "-DsuiteXmlFile=testng.xml" -Pheadless
+mvn test "-DsuiteXmlFile=testng.xml" "-Pheadless"
 ```
 
 On PowerShell, quote the `-D` argument so `.xml` is not parsed as a lifecycle phase.
@@ -137,10 +180,10 @@ Surefire runs test **methods** in parallel (`threadCount=3`) with one `WebDriver
 1. Run tests:
 
 ```bash
-mvn clean test -Pheadless
+mvn clean test "-Pheadless"
 ```
 
-2. Open the report:
+2. Open the report (no separate Allure CLI install required; the Maven plugin handles it):
 
 ```bash
 mvn allure:serve
@@ -156,14 +199,25 @@ mvn allure:report
 
 Open `target/site/allure-maven-plugin/index.html`.
 
-Raw results between runs: `target/allure-results/`. Failed tests attach a **Failure screenshot** in the report.
+Full workflow after diagnostic failures:
 
-After diagnostic failures:
-
-```bash
-mvn test -Pdiagnostic -Pheadless
+```powershell
+mvn clean test "-Pdiagnostic" "-Pheadless"
 mvn allure:serve
 ```
+
+### Report and artifact locations
+
+| Artifact | Location |
+|----------|----------|
+| Disk screenshots (on failure) | `target/screenshots/` |
+| Allure raw results | `target/allure-results/` |
+| Allure HTML (served) | `mvn allure:serve` (browser) |
+| Allure HTML (static) | `target/site/allure-maven-plugin/index.html` after `mvn allure:report` |
+| Surefire JUnit XML | `target/surefire-reports/` |
+| Surefire HTML | `target/site/surefire-report.html` after `mvn surefire-report:report` |
+
+Failed tests attach a **Failure screenshot** in the Allure report when the browser session started successfully and the test failed during execution.
 
 ### Surefire (built-in)
 
@@ -171,17 +225,18 @@ mvn allure:serve
 mvn surefire-report:report
 ```
 
-Open `target/site/surefire-report.html`. JUnit XML is under `target/surefire-reports/`.
+Open `target/site/surefire-report.html`.
 
 ## What this project covers
 
+- Maven `src/main` vs `src/test` split (framework vs tests)
 - Page Object Model with shared `BasePage` and explicit waits
 - Feature-based test classes with JUnit `@Tag` suites (smoke / regression)
 - Parameterized tests (`@ParameterizedTest` + `@CsvSource`)
 - External JSON test data (`TestDataReader` + `testdata/checkout.json`)
 - Parallel Surefire execution with isolated drivers per test
 - TestNG sample class and `testng.xml` for legacy pack patterns
-- Screenshots on failure (disk under `target/screenshots/` + Allure attachments)
+- Screenshots on failure (disk under `target/screenshots/` + Allure via `AllureReporter`)
 - Allure HTML reporting
 - Environment profiles (`dev` / `qa`) and headless mode
 
