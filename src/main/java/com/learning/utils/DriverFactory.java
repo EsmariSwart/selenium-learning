@@ -31,12 +31,24 @@ public final class DriverFactory {
     private static WebDriver createChromeDriver(boolean headless) {
         ChromeOptions options = new ChromeOptions();
         applyChromiumOptions(options, headless);
+        // Point at the system-installed Chrome so Selenium Manager doesn't fetch
+        // its own Chrome for Testing build into the cache (avoids Defender hits).
+        String binaryPath = ConfigReader.getProperty("chrome.binary",
+                "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
+        if (binaryPath != null && !binaryPath.isBlank()) {
+            options.setBinary(binaryPath);
+        }
         return new ChromeDriver(options);
     }
 
     private static WebDriver createEdgeDriver(boolean headless) {
         EdgeOptions options = new EdgeOptions();
         applyChromiumOptions(options, headless);
+        String binaryPath = ConfigReader.getProperty("edge.binary",
+                "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe");
+        if (binaryPath != null && !binaryPath.isBlank()) {
+            options.setBinary(binaryPath);
+        }
         return new EdgeDriver(options);
     }
 

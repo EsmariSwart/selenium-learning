@@ -64,20 +64,33 @@ Tests live in one class per product area. Use `@Tag("smoke")` or `@Tag("regressi
 
 - JDK 25 (or change `maven.compiler.source` / `target` in `pom.xml`)
 - Maven 3.8+
-- Chrome (default), or Firefox / Edge via `config.properties`
+- **A locally installed browser**:
+  - Chrome (default) at `C:\Program Files\Google\Chrome\Application\chrome.exe`
+  - Edge at `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`
+  - Firefox (auto-detected by Selenium Manager)
 
-Selenium 4 downloads matching drivers automatically (Selenium Manager) into your user cache (for example `%USERPROFILE%\.cache\selenium\` on Windows).
+`DriverFactory` points Chrome and Edge at the **system-installed browser binary** via `options.setBinary(...)`. This avoids Selenium Manager downloading its own "Chrome for Testing" build into the Selenium cache (`%USERPROFILE%\.cache\selenium\chrome\...`), which can be flagged by endpoint protection such as Microsoft Defender Attack Surface Reduction rules.
+
+If your browser is installed somewhere else, override the path (see [Configuration](#configuration)):
+
+```powershell
+mvn test "-Dchrome.binary=C:\Path\To\chrome.exe"
+```
+
+Selenium Manager still resolves the matching `chromedriver` / `msedgedriver` automatically into the user cache (`%USERPROFILE%\.cache\selenium\chromedriver\...`). If that path is also blocked by your endpoint protection, ask your admin to whitelist `%USERPROFILE%\.cache\selenium\`.
 
 ## Configuration
 
 | File | Purpose |
 |------|---------|
-| `src/main/resources/config.properties` | `browser`, `headless` |
+| `src/main/resources/config.properties` | `browser`, `headless`, `chrome.binary`, `edge.binary` |
 | `src/main/resources/config-dev.properties` | Dev `base.url`, username, password |
 | `src/main/resources/config-qa.properties` | QA settings |
 | `src/test/resources/testdata/checkout.json` | Checkout first name, last name, postal code |
 
 Credentials are the public Sauce Demo users only.
+
+`chrome.binary` and `edge.binary` point Selenium at the system-installed browser instead of letting Selenium Manager download Chrome / Edge. Defaults assume the standard Windows install paths; override them per machine if needed.
 
 Runtime overrides:
 
@@ -85,6 +98,7 @@ Runtime overrides:
 mvn test "-Denv=qa"
 mvn test "-Dheadless=true"
 mvn test "-Dbrowser=firefox"
+mvn test "-Dchrome.binary=C:\Path\To\chrome.exe"
 ```
 
 ## Running tests
